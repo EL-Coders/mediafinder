@@ -1,6 +1,6 @@
 import threading
 from sqlalchemy import create_engine
-from sqlalchemy import Column, TEXT, Boolean, Numeric
+from sqlalchemy import Column, TEXT, Boolean, Numeric, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import StaticPool
@@ -33,7 +33,7 @@ class AdminSettings(BASE):
 
 class Settings(BASE):
     __tablename__ = "settings"
-    user_id = Column(Numeric, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
     precise_mode = Column(Boolean)
     button_mode = Column(Boolean)
 
@@ -187,7 +187,9 @@ async def set_channel_link(link):
 async def get_channel():
     try:
         channel = SESSION.query(AdminSettings.fsub_channel).first()
-        return channel[0]
+        if channel:
+            return channel[0]
+        return False
     except NoResultFound:
         return False
     finally:
@@ -196,7 +198,9 @@ async def get_channel():
 async def get_link():
     try:
         link = SESSION.query(AdminSettings.channel_link).first()
-        return link[0]
+        if link:
+            return link[0]
+        return False
     except NoResultFound:
         return False
     finally:

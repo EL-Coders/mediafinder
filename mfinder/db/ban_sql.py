@@ -1,6 +1,6 @@
 import threading
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Numeric
+from sqlalchemy import Column, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
@@ -13,7 +13,7 @@ BASE = declarative_base()
 
 class BanList(BASE):
     __tablename__ = "banlist"
-    user_id = Column(Numeric, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
 
 
     def __init__(self, user_id):

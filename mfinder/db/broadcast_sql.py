@@ -1,6 +1,6 @@
 import threading
 from sqlalchemy import create_engine
-from sqlalchemy import Column, TEXT, Numeric
+from sqlalchemy import Column, TEXT, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.orm.exc import NoResultFound
@@ -13,7 +13,7 @@ BASE = declarative_base()
 
 class Broadcast(BASE):
     __tablename__ = "broadcast"
-    user_id = Column(Numeric, primary_key=True)
+    user_id = Column(BigInteger, primary_key=True)
     user_name = Column(TEXT)
 
     def __init__(self, user_id, user_name):

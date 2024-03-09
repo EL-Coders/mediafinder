@@ -107,15 +107,22 @@ async def pages(bot, query):
 
 async def get_result(search, page_no, user_id):
     search_settings = await get_search_settings(user_id)
-    if search_settings.precise_mode:
-        files, count = await get_precise_filter_results(query=search, page=page_no)
-        precise_search = "ON"
+    if search_settings:
+        if search_settings.precise_mode:
+            files, count = await get_precise_filter_results(query=search, page=page_no)
+            precise_search = "ON"
+        else:
+            files, count = await get_filter_results(query=search, page=page_no)
+            precise_search = "OFF"
     else:
         files, count = await get_filter_results(query=search, page=page_no)
         precise_search = "OFF"
 
-    if search_settings.button_mode:
-        button_mode = "ON"
+    if search_settings:
+        if search_settings.button_mode:
+            button_mode = "ON"
+        else:
+            button_mode = "OFF"
     else:
         button_mode = "OFF"
 
@@ -128,7 +135,7 @@ async def get_result(search, page_no, user_id):
         result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Button Mode:** `{button_mode}`\n"
         page = page_no
         for file in files:
-            if search_settings.button_mode:
+            if button_mode == "ON":
                 file_id = file.file_id
                 filename = f"[{get_size(file.file_size)}]{file.file_name}"
                 btn_kb = InlineKeyboardButton(
@@ -175,7 +182,7 @@ async def get_result(search, page_no, user_id):
         if kb:
             btn.append(kb)
 
-        if not search_settings.button_mode:
+        if button_mode == "OFF":
             result = (
                 result
                 + "\n\n"

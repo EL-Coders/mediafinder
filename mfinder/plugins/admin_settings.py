@@ -167,7 +167,7 @@ async def addfilter(bot, update):
         else:
             await update.reply_text(f"Filter `{fltr}` already exists")
     else:
-        await update.reply_text("Please send in proper format `/filter filter message`")
+        await update.reply_text("Please send in proper format `/addfilter filter message`")
 
 
 @Client.on_message(filters.command(["delfilter"]) & filters.user(ADMINS))
