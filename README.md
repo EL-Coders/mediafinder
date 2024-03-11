@@ -10,7 +10,7 @@ Re-written version of [Media Search bot](https://github.com/Mahesh0253/Media-Sea
 - Auto index files from given database channel/group.
 - User settings for customization.
 - Admin settings within the bot.
-- Show search results as Button or List.
+- Show search results as Button or List or List-Hyperlink.
 - Manual index of files from channels.
 - Supports document, video and audio file formats with file name caption support.
 - Add manual text filters.
@@ -49,7 +49,7 @@ createuser -P -s -e YOUR_USER
 
 # create a new database table:
 createdb -O YOUR_USER YOUR_DB_NAME
-Change YOUR_USER and YOUR_DB_NAME appropriately.
+#Change YOUR_USER and YOUR_DB_NAME appropriately.
 
 # finally:
 psql -h YOUR_HOST -p YOUR_PORT -d YOUR_DB_NAME -U YOUR_USER

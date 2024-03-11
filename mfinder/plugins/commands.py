@@ -9,27 +9,33 @@ from mfinder.db.broadcast_sql import add_user
 from mfinder.utils.constants import STARTMSG, HELPMSG
 from mfinder import LOGGER, ADMINS, START_MSG, HELP_MSG, START_KB, HELP_KB
 from mfinder.utils.util_support import humanbytes, get_db_size
+from mfinder.plugins.serve import get_files
 
 
 @Client.on_message(filters.command(["start"]))
 async def start(bot, update):
-    user_id = update.from_user.id
-    name = update.from_user.first_name if update.from_user.first_name else " "
-    user_name = "@" + update.from_user.username if update.from_user.username else None
-    await add_user(user_id, user_name)
+    if len(update.command) == 1:
+        user_id = update.from_user.id
+        name = update.from_user.first_name if update.from_user.first_name else " "
+        user_name = (
+            "@" + update.from_user.username if update.from_user.username else None
+        )
+        await add_user(user_id, user_name)
 
-    try:
-        start_msg = START_MSG.format(name, user_id)
-    except Exception as e:
-        LOGGER.warning(e)
-        start_msg = STARTMSG.format(name, user_id)
+        try:
+            start_msg = START_MSG.format(name, user_id)
+        except Exception as e:
+            LOGGER.warning(e)
+            start_msg = STARTMSG.format(name, user_id)
 
-    await bot.send_message(
-        chat_id=update.chat.id,
-        text=start_msg,
-        reply_to_message_id=update.reply_to_message_id,
-        reply_markup=START_KB,
-    )
+        await bot.send_message(
+            chat_id=update.chat.id,
+            text=start_msg,
+            reply_to_message_id=update.reply_to_message_id,
+            reply_markup=START_KB,
+        )
+    elif len(update.command) == 2:
+        await get_files(bot, update)
 
 
 @Client.on_message(filters.command(["help"]))

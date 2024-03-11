@@ -36,11 +36,13 @@ class Settings(BASE):
     user_id = Column(BigInteger, primary_key=True)
     precise_mode = Column(Boolean)
     button_mode = Column(Boolean)
+    link_mode = Column(Boolean)
 
-    def __init__(self, user_id, precise_mode, button_mode):
+    def __init__(self, user_id, precise_mode, button_mode, link_mode):
         self.user_id = user_id
         self.precise_mode = precise_mode
         self.button_mode = button_mode
+        self.link_mode = link_mode
 
 
 def start() -> scoped_session:
@@ -64,7 +66,7 @@ async def get_search_settings(user_id):
         return None
 
 
-async def change_search_settings(user_id, precise_mode=None, button_mode=None):
+async def change_search_settings(user_id, precise_mode=None, button_mode=None, link_mode=None):
     try:
         with INSERTION_LOCK:
             settings = SESSION.query(Settings).filter_by(user_id=user_id).first()
@@ -73,9 +75,11 @@ async def change_search_settings(user_id, precise_mode=None, button_mode=None):
                     settings.precise_mode = precise_mode
                 if button_mode is not None:
                     settings.button_mode = button_mode
+                if link_mode is not None:
+                    settings.link_mode = link_mode
             else:
                 new_settings = Settings(
-                    user_id=user_id, precise_mode=precise_mode, button_mode=button_mode
+                    user_id=user_id, precise_mode=precise_mode, button_mode=button_mode, link_mode=link_mode
                 )
                 SESSION.add(new_settings)
             SESSION.commit()

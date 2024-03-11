@@ -1,7 +1,12 @@
 import re
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+    CallbackQuery,
+)
 from pyrogram.enums import ParseMode
 from pyrogram.errors import UserNotParticipant
 from mfinder.db.files_sql import (
@@ -72,7 +77,9 @@ async def filter_(bot, message):
     if 2 < len(message.text) < 100:
         search = message.text
         page_no = 1
-        result, btn = await get_result(search, page_no, user_id)
+        me = await bot.get_me()
+        username = me.username
+        result, btn = await get_result(search, page_no, user_id, username)
         if result:
             await message.reply_text(
                 f"{result}",
@@ -91,8 +98,10 @@ async def pages(bot, query):
     org_user_id, page_no, search = query.data.split(maxsplit=3)[1:]
     org_user_id = int(org_user_id)
     page_no = int(page_no)
+    me = await bot.get_me()
+    username = me.username
 
-    result, btn = await get_result(search, page_no, user_id)
+    result, btn = await get_result(search, page_no, user_id, username)
     if result:
         await query.message.edit(
             f"{result}",
@@ -105,7 +114,7 @@ async def pages(bot, query):
         )
 
 
-async def get_result(search, page_no, user_id):
+async def get_result(search, page_no, user_id, username):
     search_settings = await get_search_settings(user_id)
     if search_settings:
         if search_settings.precise_mode:
@@ -126,13 +135,28 @@ async def get_result(search, page_no, user_id):
     else:
         button_mode = "OFF"
 
+    if search_settings:
+        if search_settings.link_mode:
+            link_mode = "ON"
+        else:
+            link_mode = "OFF"
+    else:
+        link_mode = "OFF"
+
+    if button_mode == "ON" and link_mode == "OFF":
+        search_md = "Button Mode"
+    elif button_mode == "OFF" and link_mode == "ON":
+        search_md = "Link Mode"
+    else:
+        search_md = "List Mode"
+
     if files:
         btn = []
         index = (page_no - 1) * 10
         crnt_pg = index // 10 + 1
         tot_pg = (count + 10 - 1) // 10
         btn_count = 0
-        result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Button Mode:** `{button_mode}`\n"
+        result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
         page = page_no
         for file in files:
             if button_mode == "ON":
@@ -142,6 +166,12 @@ async def get_result(search, page_no, user_id):
                     text=f"{filename}", callback_data=f"file {file_id}"
                 )
                 btn.append([btn_kb])
+            elif link_mode == "ON":
+                index += 1
+                btn_count += 1
+                file_id = file.file_id
+                filename = f"**{index}.** [{file.file_name}](https://t.me/{username}/?start={file_id}) - `[{get_size(file.file_size)}]`"
+                result += "\n" + filename
             else:
                 index += 1
                 btn_count += 1
@@ -182,11 +212,15 @@ async def get_result(search, page_no, user_id):
         if kb:
             btn.append(kb)
 
-        if button_mode == "OFF":
+        if button_mode == "OFF" and link_mode == "OFF":
             result = (
                 result
                 + "\n\n"
                 + "🔻 __Tap on below corresponding file number to download.__ 🔻"
+            )
+        elif link_mode == "ON":
+            result = (
+                result + "\n\n" + " __Tap on file name & then tap start to download.__ "
             )
 
         return result, btn
@@ -197,7 +231,11 @@ async def get_result(search, page_no, user_id):
 @Client.on_callback_query(filters.regex(r"^file (.+)$"))
 async def get_files(bot, query):
     user_id = query.from_user.id
-    file_id = query.data.split()[1]
+    if isinstance(query, CallbackQuery):
+        file_id = query.data.split()[1]
+        await query.answer()
+    elif isinstance(query, Message):
+        file_id = query.text.split()[1]
     filedetails = await get_file_details(file_id)
     admin_settings = await get_admin_settings()
     for files in filedetails:
@@ -212,7 +250,6 @@ async def get_files(bot, query):
         if admin_settings.caption_uname:
             f_caption = f_caption + "\n" + admin_settings.caption_uname
 
-        await query.answer()
         msg = await bot.send_cached_media(
             chat_id=query.from_user.id,
             file_id=file_id,
