@@ -79,11 +79,18 @@ async def filter_(bot, message):
         page_no = 1
         me = await bot.get_me()
         username = me.username
-        result, btn = await get_result(search, page_no, user_id, username)
+        result, btn, link_mode = await get_result(search, page_no, user_id, username)
+        if link_mode == "ON":
+            parse_mode = ParseMode.HTML
+        else:
+            parse_mode = ParseMode.MARKDOWN
+
         if result:
             await message.reply_text(
                 f"{result}",
                 reply_markup=InlineKeyboardMarkup(btn),
+                disable_web_page_preview=True,
+                parse_mode=parse_mode,
             )
         else:
             await bot.send_message(
@@ -101,11 +108,18 @@ async def pages(bot, query):
     me = await bot.get_me()
     username = me.username
 
-    result, btn = await get_result(search, page_no, user_id, username)
+    result, btn, link_mode = await get_result(search, page_no, user_id, username)
+    if link_mode == "ON":
+        parse_mode = ParseMode.HTML
+    else:
+        parse_mode = ParseMode.MARKDOWN
+
     if result:
         await query.message.edit(
             f"{result}",
             reply_markup=InlineKeyboardMarkup(btn),
+            disable_web_page_preview=True,
+            parse_mode=parse_mode,
         )
     else:
         await bot.send_message(
@@ -144,11 +158,11 @@ async def get_result(search, page_no, user_id, username):
         link_mode = "OFF"
 
     if button_mode == "ON" and link_mode == "OFF":
-        search_md = "Button Mode"
+        search_md = "Button"
     elif button_mode == "OFF" and link_mode == "ON":
-        search_md = "Link Mode"
+        search_md = "Link"
     else:
-        search_md = "List Mode"
+        search_md = "List Button"
 
     if files:
         btn = []
@@ -156,7 +170,10 @@ async def get_result(search, page_no, user_id, username):
         crnt_pg = index // 10 + 1
         tot_pg = (count + 10 - 1) // 10
         btn_count = 0
-        result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
+        if link_mode == "ON":
+            result = f"<b>Search Query:</b> <code>{search}</code>\n<b>Total Results:</b> <code>{count}</code>\n<b>Page:</b> <code>{crnt_pg}/{tot_pg}</code>\n<b>Precise Search: </b><code>{precise_search}</code>\n<b>Result Mode:</b> <code>{search_md}</code>\n"
+        else:
+            result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
         page = page_no
         for file in files:
             if button_mode == "ON":
@@ -170,7 +187,7 @@ async def get_result(search, page_no, user_id, username):
                 index += 1
                 btn_count += 1
                 file_id = file.file_id
-                filename = f"**{index}.** [{file.file_name}](https://t.me/{username}/?start={file_id}) - `[{get_size(file.file_size)}]`"
+                filename = f"<b>{index}. </b><a href='https://t.me/{username}/?start={file_id}'>{file.file_name}</a> - <code>[{get_size(file.file_size)}]</code>"
                 result += "\n" + filename
             else:
                 index += 1
@@ -220,12 +237,14 @@ async def get_result(search, page_no, user_id, username):
             )
         elif link_mode == "ON":
             result = (
-                result + "\n\n" + " __Tap on file name & then tap start to download.__ "
+                result
+                + "\n\n"
+                + " <code>Tap on file name & then start to download.</code> "
             )
 
-        return result, btn
+        return result, btn, link_mode
 
-    return None, None
+    return None, None, None
 
 
 @Client.on_callback_query(filters.regex(r"^file (.+)$"))

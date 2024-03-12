@@ -7,10 +7,12 @@ from mfinder.db.settings_sql import get_search_settings, change_search_settings
 @Client.on_message(filters.command(["settings"]))
 async def user_settings(bot, update):
     user_id = update.from_user.id
-    precise_mode, button_mode, link_mode, set_kb = await find_search_settings(user_id)
+    precise_mode, button_mode, link_mode, list_mode, set_kb = (
+        await find_search_settings(user_id)
+    )
     await bot.send_message(
         chat_id=user_id,
-        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`",
+        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`\n**List Mode:** `{list_mode}`",
         reply_markup=set_kb,
     )
 
@@ -27,10 +29,12 @@ async def set_precise_mode(bot, query):
         await query.answer(text="Toggle Precise Search ON/OFF", show_alert=False)
         return
 
-    precise_mode, button_mode, link_mode, set_kb = await find_search_settings(user_id)
+    precise_mode, button_mode, link_mode, list_mode, set_kb = (
+        await find_search_settings(user_id)
+    )
 
     await query.message.edit(
-        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`",
+        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`\n**List Result Mode:** `{list_mode}`",
         reply_markup=set_kb,
     )
 
@@ -40,17 +44,21 @@ async def set_button_mode(bot, query):
     user_id = query.from_user.id
     btn_mode = query.data.split()[1]
     if btn_mode == "on":
-        await change_search_settings(user_id, button_mode=True, link_mode=False)
+        await change_search_settings(
+            user_id, button_mode=True, link_mode=False, list_mode=False
+        )
     if btn_mode == "off":
-        await change_search_settings(user_id, button_mode=False)
+        await change_search_settings(user_id, button_mode=False, link_mode=True)
     if btn_mode == "md":
-        await query.answer(text="Toggle Button/List Mode", show_alert=False)
+        await query.answer(text="Toggle Button/Link Mode", show_alert=False)
         return
 
-    precise_mode, button_mode, link_mode, set_kb = await find_search_settings(user_id)
+    precise_mode, button_mode, link_mode, list_mode, set_kb = (
+        await find_search_settings(user_id)
+    )
 
     await query.message.edit(
-        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`",
+        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`\n**List Result Mode:** `{list_mode}`",
         reply_markup=set_kb,
     )
 
@@ -60,17 +68,45 @@ async def set_link_mode(bot, query):
     user_id = query.from_user.id
     link_mode = query.data.split()[1]
     if link_mode == "on":
-        await change_search_settings(user_id, button_mode=False, link_mode=True)
+        await change_search_settings(
+            user_id, button_mode=False, link_mode=True, list_mode=False
+        )
     if link_mode == "off":
-        await change_search_settings(user_id, link_mode=False)
+        await change_search_settings(user_id, link_mode=False, button_mode=True)
     if link_mode == "md":
-        await query.answer(text="Toggle Link/List Mode", show_alert=False)
+        await query.answer(text="Toggle Link/Button Mode", show_alert=False)
         return
 
-    precise_mode, button_mode, link_mode, set_kb = await find_search_settings(user_id)
+    precise_mode, button_mode, link_mode, list_mode, set_kb = (
+        await find_search_settings(user_id)
+    )
 
     await query.message.edit(
-        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`",
+        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`\n**List Result Mode:** `{list_mode}`",
+        reply_markup=set_kb,
+    )
+
+
+@Client.on_callback_query(filters.regex(r"^list (.+)$"))
+async def set_list_mode(bot, query):
+    user_id = query.from_user.id
+    list_mode = query.data.split()[1]
+    if list_mode == "on":
+        await change_search_settings(
+            user_id, button_mode=False, link_mode=False, list_mode=True
+        )
+    if list_mode == "off":
+        await change_search_settings(user_id, list_mode=False, link_mode=True)
+    if list_mode == "md":
+        await query.answer(text="Toggle List/Link Mode", show_alert=False)
+        return
+
+    precise_mode, button_mode, link_mode, list_mode, set_kb = (
+        await find_search_settings(user_id)
+    )
+
+    await query.message.edit(
+        text=f"**Below are your current settings.**\n\n**Precise Search Mode:** `{precise_mode}`\n**Button Result Mode:** `{button_mode}`\n**Link Result Mode:** `{link_mode}`\n**List Result Mode:** `{list_mode}`",
         reply_markup=set_kb,
     )
 
@@ -138,6 +174,26 @@ async def find_search_settings(user_id):
         link_mode = "OFF"
         lkb.append(l_on_kb)
 
-    set_kb = InlineKeyboardMarkup([kb, bkb, lkb])
+    lstkb = [
+        InlineKeyboardButton("List Mode:", callback_data="list md"),
+    ]
 
-    return precise_mode, button_mode, link_mode, set_kb
+    lst_on_kb = InlineKeyboardButton("Turn ON", callback_data="list on")
+    lst_off_kb = InlineKeyboardButton("Turn OFF", callback_data="list off")
+
+    if search_settings:
+        list_mode = search_settings.list_mode
+        if list_mode:
+            list_mode = "ON"
+            lstkb.append(lst_off_kb)
+        else:
+            list_mode = "OFF"
+            lstkb.append(lst_on_kb)
+    else:
+        await change_search_settings(user_id)
+        list_mode = "OFF"
+        lstkb.append(lst_on_kb)
+
+    set_kb = InlineKeyboardMarkup([kb, bkb, lkb, lstkb])
+
+    return precise_mode, button_mode, link_mode, list_mode, set_kb
