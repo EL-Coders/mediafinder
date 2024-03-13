@@ -79,19 +79,20 @@ async def filter_(bot, message):
         page_no = 1
         me = await bot.get_me()
         username = me.username
-        result, btn, link_mode = await get_result(search, page_no, user_id, username)
-        if link_mode == "ON":
-            parse_mode = ParseMode.HTML
-        else:
-            parse_mode = ParseMode.MARKDOWN
+        result, btn = await get_result(search, page_no, user_id, username)
 
         if result:
-            await message.reply_text(
-                f"{result}",
-                reply_markup=InlineKeyboardMarkup(btn),
-                disable_web_page_preview=True,
-                parse_mode=parse_mode,
-            )
+            if btn:
+                await message.reply_text(
+                    f"{result}",
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    disable_web_page_preview=True,
+                )
+            else:
+                await message.reply_text(
+                    f"{result}",
+                    disable_web_page_preview=True,
+                )
         else:
             await bot.send_message(
                 chat_id=message.from_user.id,
@@ -108,19 +109,20 @@ async def pages(bot, query):
     me = await bot.get_me()
     username = me.username
 
-    result, btn, link_mode = await get_result(search, page_no, user_id, username)
-    if link_mode == "ON":
-        parse_mode = ParseMode.HTML
-    else:
-        parse_mode = ParseMode.MARKDOWN
+    result, btn = await get_result(search, page_no, user_id, username)
 
     if result:
-        await query.message.edit(
-            f"{result}",
-            reply_markup=InlineKeyboardMarkup(btn),
-            disable_web_page_preview=True,
-            parse_mode=parse_mode,
-        )
+        if btn:
+            await query.message.edit(
+                f"{result}",
+                reply_markup=InlineKeyboardMarkup(btn),
+                disable_web_page_preview=True,
+            )
+        else:
+            await query.message.edit(
+                f"{result}",
+                disable_web_page_preview=True,
+            )
     else:
         await bot.send_message(
             chat_id=query.from_user.id,
@@ -170,10 +172,7 @@ async def get_result(search, page_no, user_id, username):
         crnt_pg = index // 10 + 1
         tot_pg = (count + 10 - 1) // 10
         btn_count = 0
-        if link_mode == "ON":
-            result = f"<b>Search Query:</b> <code>{search}</code>\n<b>Total Results:</b> <code>{count}</code>\n<b>Page:</b> <code>{crnt_pg}/{tot_pg}</code>\n<b>Precise Search: </b><code>{precise_search}</code>\n<b>Result Mode:</b> <code>{search_md}</code>\n"
-        else:
-            result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
+        result = f"**Search Query:** `{search}`\n**Total Results:** `{count}`\n**Page:** `{crnt_pg}/{tot_pg}`\n**Precise Search: **`{precise_search}`\n**Result Mode:** `{search_md}`\n"
         page = page_no
         for file in files:
             if button_mode == "ON":
@@ -187,7 +186,7 @@ async def get_result(search, page_no, user_id, username):
                 index += 1
                 btn_count += 1
                 file_id = file.file_id
-                filename = f"<b>{index}. </b><a href='https://t.me/{username}/?start={file_id}'>{file.file_name}</a> - <code>[{get_size(file.file_size)}]</code>"
+                filename = f"**{index}.** [{file.file_name}](https://t.me/{username}/?start={file_id}) - `[{get_size(file.file_size)}]`"
                 result += "\n" + filename
             else:
                 index += 1
@@ -242,9 +241,9 @@ async def get_result(search, page_no, user_id, username):
                 + " <code>Tap on file name & then start to download.</code> "
             )
 
-        return result, btn, link_mode
+        return result, btn
 
-    return None, None, None
+    return None, None
 
 
 @Client.on_callback_query(filters.regex(r"^file (.+)$"))
