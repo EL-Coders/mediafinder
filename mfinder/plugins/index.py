@@ -3,7 +3,7 @@ from pyrogram import Client, filters
 from pyrogram.errors import FloodWait
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from mfinder import ADMINS, LOGGER
-from mfinder.db.files_sql import save_file
+from mfinder.db.files_sql import save_file, delete_file
 from mfinder.utils.helpers import edit_caption
 
 
@@ -43,7 +43,7 @@ async def index_files(bot, message):
             )
         except Exception as e:
             await message.reply_text(
-                f"Unable to start indexing, either the channel is private and bot is not an admin in the forwarded chat, or you forwarded message as copy.\nError caused Due to <code>{e}</code>"
+                f"Unable to start indexing, either the channel is private and bot is not an admin in the forwarded chat, or you forwarded message as copy.\nError caused due to <code>{e}</code>"
             )
 
 
@@ -99,6 +99,36 @@ async def index(bot, query):
             await msg.edit(f"Error: {e}")
         else:
             await msg.edit(f"Total {total_files} Saved To DataBase!")
+
+
+@Client.on_message(filters.command(["index"]) & filters.user(ADMINS))
+async def index_comm(bot, update):
+    await update.reply(
+        "Now please forward the last message of the channel you want to index & follow the steps. Bot must be admin of the channel if the channel is private."
+    )
+
+
+@Client.on_message(filters.command(["delete"]) & filters.user(ADMINS))
+async def delete_files(bot, message):
+    if not message.reply_to_message:
+        await message.reply("Please reply to a file to delete")
+    org_msg = message.reply_to_message
+    try:
+        for file_type in ("document", "video", "audio"):
+            media = getattr(org_msg, file_type, None)
+            if not media:
+                break
+            del_file = await delete_file(media)
+            if del_file == "Not Found":
+                await message.reply(f"`{media.file_name}` not found in database")
+            elif del_file == True:
+                await message.reply(f"`{media.file_name}` deleted from database")
+            else:
+                await message.reply(
+                    f"Error occurred while deleting `{media.file_name}`, please check logs for more info"
+                )
+    except Exception as e:
+        LOGGER.warning("Error occurred while deleting file: %s", str(e))
 
 
 @Client.on_callback_query(filters.regex(r"^can-index$"))

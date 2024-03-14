@@ -29,6 +29,7 @@ HELP_MSG = """
 /broadcast - __Reply to a message to send that to all bot users__
 /index - __Start indexing a database channel (bot must be admin of the channel if that is provate channel)__
 __You can just forward the message from database channel for starting indexing, no need to use the /index command__
+/delete - __Reply to a file to delete it from database__
 /autodelete - __Set file auto delete time in seconds__
 /repairmode - __Enable or disable repair mode - If on, bot will not send any files__
 /customcaption - __Set custom caption for files__

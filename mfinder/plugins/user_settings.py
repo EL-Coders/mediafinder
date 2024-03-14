@@ -10,7 +10,7 @@ async def user_settings(bot, update):
     precise_mode, res_mode, set_kb = await find_search_settings(user_id)
     await bot.send_message(
         chat_id=user_id,
-        text=f"**Below are your current settings:\nYou can toggle them with right side buttons**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`",
+        text=f"**Below are your current settings:**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`\n\n__You can toggle settings with right side buttons__",
         reply_markup=set_kb,
     )
 
@@ -30,7 +30,7 @@ async def set_precise_mode(bot, query):
     precise_mode, res_mode, set_kb = await find_search_settings(user_id)
 
     await query.message.edit(
-        text=f"**Below are your current settings:\nYou can toggle them with right side buttons**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`",
+        text=f"**Below are your current settings:**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`\n\n__You can toggle settings with right side buttons__",
         reply_markup=set_kb,
     )
 
@@ -58,7 +58,7 @@ async def set_list_mode(bot, query):
     precise_mode, res_mode, set_kb = await find_search_settings(user_id)
 
     await query.message.edit(
-        text=f"**Below are your current settings:\nYou can toggle them with right side buttons**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`",
+        text=f"**Below are your current settings:**\n\n**Precise Search Mode:** `{precise_mode}`\n**Result Mode:** `{res_mode}`\n\n__You can toggle settings with right side buttons__",
         reply_markup=set_kb,
     )
 

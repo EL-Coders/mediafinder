@@ -125,10 +125,3 @@ async def server_stats(bot, update):
         await sts.edit(stats_msg)
     except Exception as e:
         await update.reply_text(str(e))
-
-
-@Client.on_message(filters.command(["index"]) & filters.user(ADMINS))
-async def index_comm(bot, update):
-    await update.reply(
-        "Now please forward the last message of the channel you want to index & follow the steps. Bot must be admin of the channel if the channel is private."
-    )

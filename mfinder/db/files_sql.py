@@ -143,3 +143,20 @@ async def get_file_details(file_id):
     except Exception as e:
         LOGGER.warning("Error occurred while retrieving file details: %s", str(e))
         return []
+
+
+async def delete_file(media):
+    file_id, file_ref = unpack_new_file_id(media.file_id)
+    try:
+        with INSERTION_LOCK:
+            file = SESSION.query(Files).filter_by(file_id=file_id).first()
+            if file:
+                SESSION.delete(file)
+                SESSION.commit()
+                return True
+            return "Not Found"
+            LOGGER.warning("File to delete not found: %s", str(file_id))
+    except Exception as e:
+        LOGGER.warning("Error occurred while deleting file: %s", str(e))
+        SESSION.rollback()
+        return False
