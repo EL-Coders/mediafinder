@@ -15,11 +15,12 @@ HELP_MSG = """
 /help - __Show this help message__
 /settings - __Toggle settings of Precise Mode and Button Mode__
 `Precise Mode:` 
-- __If on, bot will match the word & return results with only the exact match__
-- __If off, bot will match the word & return all the results containing the word__    
-`Button Mode:` 
-- __If on, bot will return results in button format__
-- __If off, bot will return results in list format__
+- __If Enabled, bot will match the word & return results with only the exact match__
+- __If Disabled, bot will match the word & return all the results containing the word__    
+`Result Mode:` 
+- __If Button, bot will return results in button format__
+- __If List, bot will return results in list format__
+- __If HyperLink, bot will return results in hyperlink format__
 
 **Admin Commands:-**
 /logs - __Get logs as a file__
@@ -37,7 +38,7 @@ __You can just forward the message from database channel for starting indexing, 
 /ban - __Ban a user from bot__ - `/ban user_id`
 /unban - __Unban a user from bot__ - `/unban user_id`
 /addfilter - __Add a text filter__ - `/addfilter filter message` __(If a filter is there, bot will send the filter rather than file)__
-/deletefilter - __Delete a text filter__ - `/deletefilter filter`
+/delfilter - __Delete a text filter__ - `/delfilter filter`
 /listfilters - __List all filters currently added in the bot__
 /forcesub - __Set force subscribe channel__ - `/forcesub channel_id` __Bot must be admin of that channel (Bot will create a new invite link for that channel)__
 /checklink - __Check invite link for force subscribe channel__

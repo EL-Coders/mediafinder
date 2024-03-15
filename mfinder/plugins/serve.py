@@ -135,13 +135,13 @@ async def get_result(search, page_no, user_id, username):
     if search_settings:
         if search_settings.precise_mode:
             files, count = await get_precise_filter_results(query=search, page=page_no)
-            precise_search = "ON"
+            precise_search = "Enabled"
         else:
             files, count = await get_filter_results(query=search, page=page_no)
-            precise_search = "OFF"
+            precise_search = "Disabled"
     else:
         files, count = await get_filter_results(query=search, page=page_no)
-        precise_search = "OFF"
+        precise_search = "Disabled"
 
     if search_settings:
         if search_settings.button_mode:
@@ -162,7 +162,7 @@ async def get_result(search, page_no, user_id, username):
     if button_mode == "ON" and link_mode == "OFF":
         search_md = "Button"
     elif button_mode == "OFF" and link_mode == "ON":
-        search_md = "Link"
+        search_md = "HyperLink"
     else:
         search_md = "List Button"
 
@@ -228,18 +228,14 @@ async def get_result(search, page_no, user_id, username):
         if kb:
             btn.append(kb)
 
-        if button_mode == "OFF" and link_mode == "OFF":
+        if button_mode and link_mode == "OFF":
             result = (
                 result
                 + "\n\n"
                 + "🔻 __Tap on below corresponding file number to download.__ 🔻"
             )
         elif link_mode == "ON":
-            result = (
-                result
-                + "\n\n"
-                + " <code>Tap on file name & then start to download.</code> "
-            )
+            result = result + "\n\n" + " __Tap on file name & then start to download.__"
 
         return result, btn
 

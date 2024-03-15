@@ -86,11 +86,17 @@ async def index(bot, query):
 
                 current += 1
                 counter += 1
-                if counter == 20:
-                    await msg.edit(
-                        f"Total messages fetched: {current}\nTotal messages saved: {total_files}"
-                    )
-                    counter -= 20
+                if counter == 50:
+                    try:
+                        await msg.edit(
+                            f"Total messages fetched: {current}\nTotal messages saved: {total_files}"
+                        )
+                    except FloodWait as e:
+                        LOGGER.warning(
+                            "FloodWait while indexing, sleeping for: %s", str(e.value)
+                        )
+                        await asyncio.sleep(e.value)
+                    counter -= 50
                 if current == total:
                     break
 
