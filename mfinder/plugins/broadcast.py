@@ -61,10 +61,10 @@ async def send_text(bot, message: Message):
                 success += 1
             else:
                 failed += 1
-            time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
-            await message.reply_text(
-                f"**Broadcast Completed**\nSent to: `{success}`\nBlocked / Deleted: `{failed}`\nCompleted in `{time_taken}` HH:MM:SS"
-            )
+        time_taken = datetime.timedelta(seconds=int(time.time() - start_time))
+        await message.reply_text(
+            f"**Broadcast Completed**\nSent to: `{success}`\nBlocked / Deleted: `{failed}`\nCompleted in `{time_taken}` HH:MM:SS"
+        )
 
     else:
         reply_error = (
