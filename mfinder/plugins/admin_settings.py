@@ -11,6 +11,7 @@ from mfinder.db.settings_sql import (
 )
 from mfinder.db.ban_sql import is_banned, ban_user, unban_user
 from mfinder.db.filters_sql import add_filter, rem_filter, list_filters
+from mfinder.db.files_sql import count_files
 from mfinder import ADMINS, DB_CHANNELS
 
 
@@ -167,7 +168,9 @@ async def addfilter(bot, update):
         else:
             await update.reply_text(f"Filter `{fltr}` already exists")
     else:
-        await update.reply_text("Please send in proper format `/addfilter filter message`")
+        await update.reply_text(
+            "Please send in proper format `/addfilter filter message`"
+        )
 
 
 @Client.on_message(filters.command(["delfilter"]) & filters.user(ADMINS))
@@ -261,3 +264,9 @@ async def caption_username(bot, update):
         await update.reply_text(
             "Please send in proper format `/setusername username/off`"
         )
+
+
+@Client.on_message(filters.command(["total"]) & filters.user(ADMINS))
+async def count_f(bot, update):
+    count = await count_files()
+    await update.reply_text(f"**Total no. of files in DB:** `{count}`")

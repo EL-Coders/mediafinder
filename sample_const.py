@@ -42,6 +42,7 @@ __You can just forward the message from database channel for starting indexing, 
 /listfilters - __List all filters currently added in the bot__
 /forcesub - __Set force subscribe channel__ - `/forcesub channel_id` __Bot must be admin of that channel (Bot will create a new invite link for that channel)__
 /checklink - __Check invite link for force subscribe channel__
+/total - __Get count of total files in DB__
 """
 
 

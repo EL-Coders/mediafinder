@@ -160,3 +160,12 @@ async def delete_file(media):
         LOGGER.warning("Error occurred while deleting file: %s", str(e))
         SESSION.rollback()
         return False
+
+async def count_files():
+    try:
+        with INSERTION_LOCK:
+            total_count = SESSION.query(Files).count()
+            return total_count
+    except Exception as e:
+        LOGGER.warning("Error occurred while counting files: %s", str(e))
+        return 0

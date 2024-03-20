@@ -9,6 +9,7 @@ from pyrogram.types import (
 )
 from pyrogram.enums import ParseMode
 from pyrogram.errors import UserNotParticipant
+from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified
 from mfinder.db.files_sql import (
     get_filter_results,
     get_file_details,
@@ -106,23 +107,26 @@ async def pages(bot, query):
     org_user_id, page_no, search = query.data.split(maxsplit=3)[1:]
     org_user_id = int(org_user_id)
     page_no = int(page_no)
-    me = await bot.get_me()
+    me = bot.me
     username = me.username
 
     result, btn = await get_result(search, page_no, user_id, username)
 
     if result:
-        if btn:
-            await query.message.edit(
-                f"{result}",
-                reply_markup=InlineKeyboardMarkup(btn),
-                disable_web_page_preview=True,
-            )
-        else:
-            await query.message.edit(
-                f"{result}",
-                disable_web_page_preview=True,
-            )
+        try:
+            if btn:
+                await query.message.edit(
+                    f"{result}",
+                    reply_markup=InlineKeyboardMarkup(btn),
+                    disable_web_page_preview=True,
+                )
+            else:
+                await query.message.edit(
+                    f"{result}",
+                    disable_web_page_preview=True,
+                )
+        except MessageNotModified:
+            pass
     else:
         await bot.send_message(
             chat_id=query.from_user.id,
@@ -247,7 +251,7 @@ async def get_files(bot, query):
     user_id = query.from_user.id
     if isinstance(query, CallbackQuery):
         file_id = query.data.split()[1]
-        await query.answer()
+        await query.answer("Sending file...", cache_time=60)
     elif isinstance(query, Message):
         file_id = query.text.split()[1]
     filedetails = await get_file_details(file_id)

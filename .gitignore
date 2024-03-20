@@ -165,3 +165,4 @@ mfinder.session
 mfinder.session-shm
 mfinder.session-wal
 mfinder.session-journal
+.vscode/settings.json
