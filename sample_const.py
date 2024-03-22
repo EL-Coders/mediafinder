@@ -37,7 +37,7 @@ __You can just forward the message from database channel for starting indexing, 
 /adminsettings - __Get current admin settings__
 /ban - __Ban a user from bot__ - `/ban user_id`
 /unban - __Unban a user from bot__ - `/unban user_id`
-/addfilter - __Add a text filter__ - `/addfilter filter message` __(If a filter is there, bot will send the filter rather than file)__
+/addfilter - __Add a text filter__ - `/addfilter filter message` __or__ `/addfilter "filter multiple words" message` __(If a filter is there, bot will send the filter rather than file)__
 /delfilter - __Delete a text filter__ - `/delfilter filter`
 /listfilters - __List all filters currently added in the bot__
 /forcesub - __Set force subscribe channel__ - `/forcesub channel_id` __Bot must be admin of that channel (Bot will create a new invite link for that channel)__

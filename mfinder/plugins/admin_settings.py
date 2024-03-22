@@ -1,3 +1,4 @@
+import shlex
 from pyrogram import Client, filters
 from mfinder.db.settings_sql import (
     get_admin_settings,
@@ -158,9 +159,9 @@ async def unbanuser(bot, update):
 
 @Client.on_message(filters.command(["addfilter"]) & filters.user(ADMINS))
 async def addfilter(bot, update):
-    data = update.text.split()
+    data = shlex.split(update.text)
     if len(data) >= 3:
-        fltr = data[1].lower()
+        fltr = data[1].strip('"').lower()
         message = " ".join(data[2:])
         add = await add_filter(fltr, message)
         if add:
@@ -176,8 +177,8 @@ async def addfilter(bot, update):
 @Client.on_message(filters.command(["delfilter"]) & filters.user(ADMINS))
 async def delfilter(bot, update):
     data = update.text.split()
-    if len(data) == 2:
-        fltr = data[-1].lower()
+    if len(data) >= 2:
+        fltr = " ".join(data[1:])
         rem = await rem_filter(fltr)
         if rem:
             await update.reply_text(f"Filter `{fltr}` removed")
