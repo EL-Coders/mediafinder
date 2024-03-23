@@ -7,7 +7,7 @@ from pyrogram.types import (
     Message,
     CallbackQuery,
 )
-from pyrogram.enums import ParseMode
+from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.errors import UserNotParticipant
 from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified
 from mfinder.db.files_sql import (
@@ -43,7 +43,7 @@ async def filter_(bot, message):
     if force_sub:
         try:
             user = await bot.get_chat_member(int(force_sub), user_id)
-            if user.status == "kicked":
+            if user.status == ChatMemberStatus.BANNED:
                 await message.reply_text("Sorry, you are Banned to use me.")
                 return
         except UserNotParticipant:
