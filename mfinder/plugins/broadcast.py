@@ -33,7 +33,7 @@ async def send_text(bot, message: Message):
             chat_id=user_id,
             from_chat_id=message.chat.id,
             message_id=message.reply_to_message_id,
-            caption=message.reply_to_message.caption,
+            # caption=message.reply_to_message.caption,
             reply_markup=message.reply_to_message.reply_markup,
         )
         query = await query_msg()
@@ -47,7 +47,7 @@ async def send_text(bot, message: Message):
                     chat_id=chat_id,
                     from_chat_id=message.chat.id,
                     message_id=message.reply_to_message_id,
-                    caption=message.reply_to_message.caption,
+                    # caption=message.reply_to_message.caption,
                     reply_markup=message.reply_to_message.reply_markup,
                 )
                 LOGGER.info("Broadcast sent to %s", chat_id)
