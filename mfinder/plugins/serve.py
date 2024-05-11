@@ -6,6 +6,7 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
     Message,
     CallbackQuery,
+    LinkPreviewOptions,
 )
 from pyrogram.enums import ParseMode, ChatMemberStatus
 from pyrogram.errors import UserNotParticipant
@@ -36,7 +37,7 @@ async def filter_(bot, message):
         return
 
     if await is_banned(user_id):
-        await message.reply_text("You are banned. You can't use this bot.")
+        await message.reply_text("You are banned. You can't use this bot.", quote=True)
         return
 
     force_sub = await get_channel()
@@ -44,24 +45,24 @@ async def filter_(bot, message):
         try:
             user = await bot.get_chat_member(int(force_sub), user_id)
             if user.status == ChatMemberStatus.BANNED:
-                await message.reply_text("Sorry, you are Banned to use me.")
+                await message.reply_text("Sorry, you are Banned to use me.", quote=True)
                 return
         except UserNotParticipant:
             link = await get_link()
-            await bot.send_message(
-                chat_id=user_id,
+            await bot.reply_text(
                 text="**Please join my Update Channel to use this Bot!**",
                 reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("🤖 Join Channel", url=link)]]
                 ),
                 parse_mode=ParseMode.MARKDOWN,
+                quote=True,
             )
             return
         except Exception as e:
             LOGGER.warning(e)
-            await bot.send_message(
-                chat_id=user_id,
+            await bot.reply_text(
                 text="Something went wrong, please contact my support group",
+                quote=True,
             )
             return
 
@@ -72,7 +73,10 @@ async def filter_(bot, message):
 
     fltr = await is_filter(message.text)
     if fltr:
-        await message.reply_text(fltr.message)
+        await message.reply_text(
+            text=fltr.message,
+            quote=True,
+        )
         return
 
     if 2 < len(message.text) < 100:
@@ -87,17 +91,19 @@ async def filter_(bot, message):
                 await message.reply_text(
                     f"{result}",
                     reply_markup=InlineKeyboardMarkup(btn),
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
+                    quote=True,
                 )
             else:
                 await message.reply_text(
                     f"{result}",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
+                    quote=True,
                 )
         else:
-            await bot.send_message(
-                chat_id=message.from_user.id,
+            await bot.reply_text(
                 text="No results found.\nOr retry with the correct spelling 🤐",
+                quote=True,
             )
 
 
@@ -118,19 +124,19 @@ async def pages(bot, query):
                 await query.message.edit(
                     f"{result}",
                     reply_markup=InlineKeyboardMarkup(btn),
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
             else:
                 await query.message.edit(
                     f"{result}",
-                    disable_web_page_preview=True,
+                    link_preview_options=LinkPreviewOptions(is_disabled=True),
                 )
         except MessageNotModified:
             pass
     else:
-        await bot.send_message(
-            chat_id=query.from_user.id,
+        await bot.reply_text(
             text="No results found.\nOr retry with the correct spelling 🤐",
+            quote=True,
         )
 
 
@@ -252,8 +258,10 @@ async def get_files(bot, query):
     if isinstance(query, CallbackQuery):
         file_id = query.data.split()[1]
         await query.answer("Sending file...", cache_time=60)
+        cbq = True
     elif isinstance(query, Message):
         file_id = query.text.split()[1]
+        cbq = False
     filedetails = await get_file_details(file_id)
     admin_settings = await get_admin_settings()
     for files in filedetails:
@@ -268,12 +276,20 @@ async def get_files(bot, query):
         if admin_settings.caption_uname:
             f_caption = f_caption + "\n" + admin_settings.caption_uname
 
-        msg = await bot.send_cached_media(
-            chat_id=query.from_user.id,
-            file_id=file_id,
-            caption=f_caption,
-            parse_mode=ParseMode.MARKDOWN,
-        )
+        if cbq:
+            msg = await query.message.reply_cached_media(
+                file_id=file_id,
+                caption=f_caption,
+                parse_mode=ParseMode.MARKDOWN,
+                quote=True,
+            )
+        else:
+            msg = await query.reply_cached_media(
+                file_id=file_id,
+                caption=f_caption,
+                parse_mode=ParseMode.MARKDOWN,
+                quote=True,
+            )
 
         if admin_settings.auto_delete:
             delay_dur = admin_settings.auto_delete
