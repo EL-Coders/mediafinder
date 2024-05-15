@@ -49,7 +49,7 @@ async def filter_(bot, message):
                 return
         except UserNotParticipant:
             link = await get_link()
-            await bot.reply_text(
+            await message.reply_text(
                 text="**Please join my Update Channel to use this Bot!**",
                 reply_markup=InlineKeyboardMarkup(
                     [[InlineKeyboardButton("🤖 Join Channel", url=link)]]
@@ -60,7 +60,7 @@ async def filter_(bot, message):
             return
         except Exception as e:
             LOGGER.warning(e)
-            await bot.reply_text(
+            await message.reply_text(
                 text="Something went wrong, please contact my support group",
                 quote=True,
             )
@@ -101,7 +101,7 @@ async def filter_(bot, message):
                     quote=True,
                 )
         else:
-            await bot.reply_text(
+            await message.reply_text(
                 text="No results found.\nOr retry with the correct spelling 🤐",
                 quote=True,
             )
@@ -134,7 +134,7 @@ async def pages(bot, query):
         except MessageNotModified:
             pass
     else:
-        await bot.reply_text(
+        await query.message.reply_text(
             text="No results found.\nOr retry with the correct spelling 🤐",
             quote=True,
         )
